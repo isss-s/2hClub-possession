@@ -1,3 +1,48 @@
+# 2hClub — More than a Hack 2027, Phase 1 submission
+
+This repository is team **2hClub**'s entry. It is the official starter kit plus our own code in
+`starter/`. Our method and results are described in our technical document.
+
+## Reproduce our submission file
+
+Tested on macOS with Python 3.9.6.
+
+    # 1. set up a clean Python environment
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements-2hclub.txt     # exact package versions we used
+
+    # 2. put the match data (from the organisers) into data/  -- see DATA.md for the layout
+
+    # 3. build the submission (takes a few minutes)
+    python starter/my_second.py --min-dead 300
+
+    # 4. check it and name it
+    python evaluation/validate_submission.py evaluation/results/my_second_w125_slow3.0_min300.csv
+    cp evaluation/results/my_second_w125_slow3.0_min300.csv 2hClub.csv
+
+## Our code
+
+| file | what it does |
+|---|---|
+| `starter/my_second.py` | **the submission.** Nearest player to the ball, plus three rules below |
+| `starter/my_first.py` | gap filling and possession switching, used by `my_second.py` |
+| `starter/look_dead.py` | analysis: what happens around each dead ball in the public 5 minutes |
+| `starter/look_speed.py` | analysis: ball speed in live play vs dead balls |
+
+The three rules, on top of "the team of the player nearest the ball has it":
+
+1. **Gap filling** — if the ball disappears for 2 s or less, the team that had it keeps it.
+2. **Switching** — possession only changes team after the other team has been nearest for 2 s in a row.
+3. **Slow ball = dead ball** — if the ball's median speed over 10 s is under 3 m/s for at least
+   12 s, play is stopped, so those frames are `D`.
+
+The match data is not in this repository; it is licensed to enrolled participants only.
+
+---
+
+*Below: the official starter kit README from Metrica Sports.*
+
 # More than a Hack 2027 — Phase 1: Ball Possession
 
 **Organised by [Metrica Sports](https://metrica-sports.com), [FC Barcelona](https://www.fcbarcelona.com)
