@@ -15,17 +15,19 @@ Tested on macOS with Python 3.9.6.
     # 2. put the match data (from the organisers) into data/  -- see DATA.md for the layout
 
     # 3. build the submission (takes a few minutes)
-    python starter/my_second.py --min-dead 300
+    python starter/my_third.py
 
     # 4. check it and name it
-    python evaluation/validate_submission.py evaluation/results/my_second_w125_slow3.0_min300.csv
-    cp evaluation/results/my_second_w125_slow3.0_min300.csv 2hClub.csv
+    python evaluation/validate_submission.py evaluation/results/my_third.csv
+    cp evaluation/results/my_third.csv 2hClub.csv
 
 ## Our code
 
 | file | what it does |
 |---|---|
-| `starter/my_second.py` | **the submission.** Nearest player to the ball, plus three rules below |
+| `starter/my_third.py` | **the submission.** Ball control, out of play, gaps and slow ball (see technical document) |
+| `starter/my_second.py` | earlier version: nearest player plus three rules below |
+| `starter/label_tool.py` | tool we used to hand-label extra validation windows from the video |
 | `starter/my_first.py` | gap filling and possession switching, used by `my_second.py` |
 | `starter/look_dead.py` | analysis: what happens around each dead ball in the public 5 minutes |
 | `starter/look_speed.py` | analysis: ball speed in live play vs dead balls |
