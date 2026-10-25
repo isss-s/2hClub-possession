@@ -22,8 +22,11 @@ output the *shape* of real football possession: few, long possessions separated 
    *Why:* in long possessions the defending team presses, so an opponent is often the nearest
    player without having the ball. Nearest-player labels flip back and forth; control does not.
 2. **Ball out of play.** The ball seen more than 0.5 m outside the pitch lines is a dead ball.
-3. **Ball missing.** Short gaps (up to 2 s) are the ball hidden behind players: possession
-   continues. Gaps longer than 6 s are treated as dead ball.
+3. **Ball missing — ask the players.** Short gaps (up to 2 s) are the ball hidden behind players:
+   possession continues. In longer gaps, a frame is dead only if the players have slowed down:
+   the median over 5 s of the mean speed of all tracked players is below 1.3 m/s. On our labels,
+   players move at a median ~2.2 m/s in live play and ~1.0 m/s at a stoppage. In some stretches
+   the ball is missing for 20 s or more while play goes on; this keeps those alive.
 4. **Slow ball = dead ball.** When the median ball speed over a ±5 s window stays under 3 m/s for
    at least 12 s, play is stopped (ball placed for a goal kick or free kick), so those frames are `D`.
 
@@ -66,30 +69,40 @@ would have misled us.
 
 - **Who has the ball:** the team with a player within 1.5 m of the ball; changes after 1 s of
   the other team's control. No "contested" state: a loose ball stays with the last team.
-- **Dead ball (`D`):** ball outside the lines; ball missing for more than 6 s; or ball slow
-  (median < 3 m/s) for at least 12 s.
+- **Dead ball (`D`):** ball outside the lines; ball missing for more than 2 s while the players
+  walk (median speed < 1.3 m/s); or ball slow (median < 3 m/s) for at least 12 s.
 - **Restarts:** after a dead ball, possession goes to the first team to control the ball.
 - **Abstention:** we never output `X`; ungraded frames (before kick-off, half-time) do not matter.
 
 ## 5. Results
 
-spellF1 per window (public = official ground truth; w1–w3 = our own labels):
+spellF1 per window (public = official ground truth; w1–w6 = our own labels, 6 windows of
+5 minutes spread over both halves):
 
-| version | public | w1 | w2 | w3 | all windows |
-|---|---|---|---|---|---|
-| baseline_smooth50 (official floor) | 0.326 | 0.188 | — | — | — |
-| nearest player + gap filling + 2 s switching + slow ball (`my_second`) | 0.529 | 0.249 | 0.243 | 0.207 | 0.315 |
-| **control within 1.5 m + out of play + gaps + slow ball (`my_third`, submitted)** | **0.568** | **0.452** | **0.600** | **0.300** | **0.474** |
+| version | public | w1 | w2 | w3 | w4 | w5 | w6 | all windows |
+|---|---|---|---|---|---|---|---|---|
+| baseline_smooth50 (official floor; 0.2433 on the full match) | 0.326 | 0.188 | 0.092 | 0.204 | 0.286 | 0.332 | 0.147 | 0.227 |
+| nearest player + gap filling + 2 s switching + slow ball (`my_second`) | 0.529 | 0.249 | 0.243 | 0.207 | 0.449 | 0.463 | 0.237 | 0.349 |
+| control within 1.5 m + out of play + gaps over 6 s dead + slow ball (`my_third`) | 0.568 | 0.452 | 0.600 | 0.300 | 0.428 | 0.439 | 0.400 | 0.447 |
+| **`my_third` + long gaps dead only if players slow (`my_fourth`, submitted)** | **0.555** | **0.417** | **0.773** | **0.291** | **0.527** | **0.483** | **0.400** | **0.484** |
 
-Nearby settings (on-the-ball radius 1.5–2 m, switch after 0.6–1 s) all score within about 0.03
-of each other overall, so the result does not depend on one lucky setting.
+Two checks that these numbers mean something:
+
+- **Our labels behave like the official ones.** The official baseline scores 0.227 on all our
+  windows together and 0.2433 on the full match, so our windows are a fair stand-in for the
+  private ground truth.
+- **Each rule was tested on windows labelled after it was designed.** The control rule was
+  designed on w1 and confirmed on w2; the players-speed rule was proposed after w3 and confirmed
+  on w4, w5 and w6, which had not been labelled yet (w4 0.428 → 0.527, w5 0.439 → 0.483, w6 equal).
+
+Nearby settings (on-the-ball radius 1.25–2 m, switch after 0.8–1.4 s, players threshold
+1.2–1.5 m/s) all score between 0.48 and 0.50 overall. We kept the round default values rather than
+picking the best of these, because the differences are within noise.
 
 ## 6. Limitations and what we would do next
 
-- **Long ball-tracking gaps in live play.** In some stretches the ball is visible only ~40% of the
-  time, and gaps over 6 s are called dead even when play continues. Players' movement separates
-  the two well (median team speed ~2.2 m/s in live play vs ~1.0 m/s in dead ball); using it to
-  decide long gaps improved our validation score slightly and is our next step.
+- **Poor ball tracking.** In some stretches the ball is visible only ~40% of the time (window w3
+  remains our weakest). Ball detection from the video itself could fill these gaps.
 - **Very short possessions** (under 1 s) are deliberately ignored by the 1 s switching rule; the
   official labels count them.
 - **Duels and aerial balls:** the 1.5 m radius cannot tell a tackle from control. Ball and player
@@ -103,8 +116,8 @@ Tested on macOS, Python 3.9.6. From a fresh clone of the repository, with the ma
     python3 -m venv .venv
     source .venv/bin/activate
     pip install -r requirements-2hclub.txt
-    python starter/my_third.py
-    python evaluation/validate_submission.py evaluation/results/my_third.csv
-    cp evaluation/results/my_third.csv 2hClub.csv
+    python starter/my_fourth.py
+    python evaluation/validate_submission.py evaluation/results/my_fourth.csv
+    cp evaluation/results/my_fourth.csv 2hClub.csv
 
 Runtime is under a minute on a laptop; no GPU and no extra data are needed.

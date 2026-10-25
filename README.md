@@ -15,17 +15,18 @@ Tested on macOS with Python 3.9.6.
     # 2. put the match data (from the organisers) into data/  -- see DATA.md for the layout
 
     # 3. build the submission (takes a few minutes)
-    python starter/my_third.py
+    python starter/my_fourth.py
 
     # 4. check it and name it
-    python evaluation/validate_submission.py evaluation/results/my_third.csv
-    cp evaluation/results/my_third.csv 2hClub.csv
+    python evaluation/validate_submission.py evaluation/results/my_fourth.csv
+    cp evaluation/results/my_fourth.csv 2hClub.csv
 
 ## Our code
 
 | file | what it does |
 |---|---|
-| `starter/my_third.py` | **the submission.** Ball control, out of play, gaps and slow ball (see technical document) |
+| `starter/my_fourth.py` | **the submission.** my_third, plus: long ball gaps are dead only if the players slow down |
+| `starter/my_third.py` | ball control, out of play, gaps and slow ball (used by my_fourth) |
 | `starter/my_second.py` | earlier version: nearest player plus three rules below |
 | `starter/label_tool.py` | tool we used to hand-label extra validation windows from the video |
 | `starter/my_first.py` | gap filling and possession switching, used by `my_second.py` |
