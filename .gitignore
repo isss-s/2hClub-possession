@@ -63,3 +63,5 @@ venv/
 env/
 .DS_Store
 submission/
+.venv-vision/
+balldet/
